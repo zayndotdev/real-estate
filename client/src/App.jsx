@@ -1,9 +1,11 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { About, Home, Profile, SignIn, SignUp } from "./pages";
+import { Header } from "./components";
 
 function App() {
   return (
     <BrowserRouter>
+      <Header />
       {/* Your routes and components go here */}
       <Routes>
         <Route path="/" element={<Home />} />
