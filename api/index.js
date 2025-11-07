@@ -1,10 +1,13 @@
 import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import cors from "cors";
 import userRoutes from "./routes/user.route.js";
+import authRoutes from "./routes/auth.route.js";
 
 dotenv.config();
 
+const app = express();
 const PORT = process.env.PORT || 4000;
 const mongoURI = process.env.MONGO_URI;
 
@@ -13,10 +16,13 @@ if (!mongoURI) {
   process.exit(1); // stop here
 }
 
-const app = express();
-
-app.use(express.json()); // if you will parse JSON later
-
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(
+  cors({
+    credentials: true,
+  })
+);
 // Connect to MongoDB
 mongoose
   .connect(mongoURI, {
@@ -32,6 +38,19 @@ mongoose
 
 // Routes
 app.use("/api/users", userRoutes);
+app.use("/api/auth", authRoutes);
+
+// middleware to handle errors
+app.use((err, req, res, next) => {
+  const statusCode = err.statusCode || 500;
+  const message = err.message || "Internal Server Error";
+  return res.status(statusCode).json({
+    success: false,
+    statusCode,
+    message,
+    error: err.stack,
+  });
+});
 
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on http://localhost:${PORT}`);
