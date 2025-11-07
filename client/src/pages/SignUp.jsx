@@ -50,11 +50,17 @@ function SignUp() {
     }
 
     try {
-      const response = await axios.post("/api/auth/signup", {
-        username,
-        email,
-        password,
-      });
+      const response = await axios.post(
+        "/api/auth/signup",
+        {
+          username,
+          email,
+          password,
+        },
+        {
+          withCredentials: true,
+        }
+      );
 
       toast.success(response.data.message || "Account created successfully!");
 

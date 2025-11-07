@@ -2,6 +2,7 @@ import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import userRoutes from "./routes/user.route.js";
 import authRoutes from "./routes/auth.route.js";
 
@@ -18,11 +19,13 @@ if (!mongoURI) {
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 app.use(
   cors({
     credentials: true,
   })
 );
+
 // Connect to MongoDB
 mongoose
   .connect(mongoURI, {
@@ -48,7 +51,6 @@ app.use((err, req, res, next) => {
     success: false,
     statusCode,
     message,
-    error: err.stack,
   });
 });
 

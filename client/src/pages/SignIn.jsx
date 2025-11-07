@@ -2,8 +2,11 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { signInSuccess } from "../redux/user/userSlice";
+import { useDispatch } from "react-redux";
 
 function SignIn() {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -43,12 +46,19 @@ function SignIn() {
     }
 
     try {
-      const response = await axios.post("/api/auth/signin", {
-        email,
-        password,
-      });
+      const response = await axios.post(
+        "/api/auth/signin",
+        {
+          email,
+          password,
+        },
+        {
+          withCredentials: true,
+        }
+      );
 
       toast.success(response.data.message || "Signed in successfully!");
+      dispatch(signInSuccess(response.data.user));
 
       // Save token if backend sends it (optional)
       if (response.data.token) {
