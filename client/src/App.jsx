@@ -1,7 +1,7 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { About, Home, Profile, SignIn, SignUp } from "./pages";
-import { Header } from "./components";
-import { ToastContainer, toast } from "react-toastify";
+import { Header, PrivateRoute } from "./components";
+import { ToastContainer } from "react-toastify";
 
 function App() {
   return (
@@ -14,7 +14,9 @@ function App() {
         <Route path="sign-in" element={<SignIn />} />
         <Route path="sign-up" element={<SignUp />} />
         <Route path="about" element={<About />} />
-        <Route path="profile" element={<Profile />} />
+        <Route element={<PrivateRoute />}>
+          <Route path="profile" element={<Profile />} />
+        </Route>
       </Routes>
     </BrowserRouter>
   );

@@ -5,6 +5,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import userRoutes from "./routes/user.route.js";
 import authRoutes from "./routes/auth.route.js";
+import uploadRoutes from "./routes/upload.route.js";
 
 dotenv.config();
 
@@ -42,6 +43,7 @@ mongoose
 // Routes
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/upload", uploadRoutes);
 
 // middleware to handle errors
 app.use((err, req, res, next) => {

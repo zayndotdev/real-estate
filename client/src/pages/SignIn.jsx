@@ -2,8 +2,13 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { signInSuccess } from "../redux/user/userSlice";
+import {
+  signInFailure,
+  signInStart,
+  signInSuccess,
+} from "../redux/user/userSlice";
 import { useDispatch } from "react-redux";
+import { OAuth } from "../components";
 
 function SignIn() {
   const dispatch = useDispatch();
@@ -46,6 +51,7 @@ function SignIn() {
     }
 
     try {
+      dispatch(signInStart());
       const response = await axios.post(
         "/api/auth/signin",
         {
@@ -61,14 +67,15 @@ function SignIn() {
       dispatch(signInSuccess(response.data.user));
 
       // Save token if backend sends it (optional)
-      if (response.data.token) {
-        localStorage.setItem("token", response.data.token);
-      }
+      // if (response.data.token) {
+      //   localStorage.setItem("token", response.data.token);
+      // }
 
       // Reset form and redirect
       setFormData({ email: "", password: "" });
-      setTimeout(() => navigate("/"), 1500);
+      setTimeout(() => navigate("/"), 500);
     } catch (error) {
+      dispatch(signInFailure());
       toast.error(error.response?.data?.message || "Invalid credentials");
     } finally {
       setLoading(false);
@@ -176,12 +183,7 @@ function SignIn() {
         </div>
 
         {/* Google Button */}
-        <button
-          type="button"
-          className="w-full border border-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 font-medium text-sm transition-colors duration-200 flex items-center justify-center cursor-pointer"
-        >
-          CONTINUE WITH GOOGLE
-        </button>
+        <OAuth />
 
         {/* Sign Up Link */}
         <p className="text-center text-gray-600 mt-3 sm:mt-4 text-xs sm:text-sm">

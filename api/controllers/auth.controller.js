@@ -6,41 +6,37 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-// Controller for handling user registration
+// =================== SIGN UP ===================
 const signUp = async (req, res, next) => {
   try {
     const { username, email, password } = req.body;
 
-    // Validate required fields
     if (!username || !email || !password) {
       return next(
         errorHandler(400, "Please provide a username, email, and password.")
       );
     }
 
-    // Check if a user with the given email already exists
     const emailExists = await User.findOne({ email });
     if (emailExists) {
       return next(
         errorHandler(400, "An account with this email already exists.")
       );
     }
+
     const usernameExists = await User.findOne({ username });
     if (usernameExists) {
       return next(errorHandler(400, "Username already taken."));
     }
 
-    // Hash the password before saving
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create a new user record in the database
     const user = await User.create({
       username,
       email,
       password: hashedPassword,
     });
 
-    // Return a success response with basic user info
     const { password: _, ...userWithoutPassword } = user._doc;
     return res.status(201).json({
       success: true,
@@ -53,34 +49,34 @@ const signUp = async (req, res, next) => {
   }
 };
 
-// handle Login
+// =================== SIGN IN ===================
 const signIn = async (req, res, next) => {
   try {
     const { email, password } = req.body;
-    // Validate required fields
+
     if (!email || !password) {
       return next(errorHandler(400, "Please provide both email and password."));
     }
-    // Find the user by email
+
     const user = await User.findOne({ email });
     if (!user) {
       return next(errorHandler(400, "Invalid email or password."));
     }
-    // Compare the provided password with the stored hashed password
+
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return next(errorHandler(400, "Invalid email or password."));
     }
+
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
       expiresIn: "7d",
     });
+
     res.cookie("token", token, {
       httpOnly: true,
     });
 
     const { password: _, ...userWithoutPassword } = user._doc;
-
-    // Successful login : return user info without password
     return res.status(200).json({
       success: true,
       message: "Signed in successfully.",
@@ -92,4 +88,63 @@ const signIn = async (req, res, next) => {
   }
 };
 
-export { signUp, signIn };
+// =================== GOOGLE AUTH ===================
+const googleAuth = async (req, res, next) => {
+  try {
+    const { displayName, email, photoURL } = req.body;
+
+    if (!email) {
+      return next(errorHandler(400, "Google account did not return an email."));
+    }
+
+    let user = await User.findOne({ email });
+
+    // If user does not exist, create one automatically
+    if (!user) {
+      let baseUsername = displayName
+        ? displayName.toLowerCase().replace(/\s+/g, "")
+        : "user";
+
+      let username;
+      let exists = true;
+
+      // Loop until we find a unique username
+      while (exists) {
+        username = baseUsername + Math.floor(Math.random() * 10000); // random 0-9999
+        const userCheck = await User.findOne({ username });
+        if (!userCheck) exists = false;
+      }
+
+      const randomPassword = Math.random().toString(36).slice(-8);
+      const hashedPassword = await bcrypt.hash(randomPassword, 10);
+
+      user = await User.create({
+        username,
+        email,
+        password: hashedPassword,
+        avatar: photoURL, // optional: if your schema supports it
+      });
+    }
+
+    // Generate JWT token
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
+
+    res.cookie("token", token, {
+      httpOnly: true,
+    });
+
+    const { password: _, ...userWithoutPassword } = user._doc;
+    return res.status(200).json({
+      success: true,
+      message: "Google sign-in successful.",
+      user: userWithoutPassword,
+    });
+  } catch (error) {
+    console.error("Google Auth Error:", error.message);
+    return next(error);
+  }
+};
+
+export { signUp, signIn, googleAuth };

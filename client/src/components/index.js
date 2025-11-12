@@ -1,3 +1,5 @@
 import Header from "./Header";
+import OAuth from "./OAuth";
+import PrivateRoute from "./PrivateRoute";
 
-export { Header };
+export { Header, OAuth, PrivateRoute };

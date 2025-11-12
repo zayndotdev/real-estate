@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { OAuth } from "../components";
 
 function SignUp() {
   const navigate = useNavigate();
@@ -196,12 +197,7 @@ function SignUp() {
         </div>
 
         {/* Google Button */}
-        <button
-          type="button"
-          className="w-full border border-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 font-medium text-sm transition-colors duration-200 flex items-center justify-center cursor-pointer"
-        >
-          CONTINUE WITH GOOGLE
-        </button>
+        <OAuth />
 
         {/* Sign In Link */}
         <p className="text-center text-gray-600 mt-3 sm:mt-4 text-xs sm:text-sm">

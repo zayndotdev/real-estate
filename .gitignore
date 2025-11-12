@@ -4,6 +4,10 @@ api/.env
 client/.env
 .cursorignore
 
+# Uploads directory (temporary files)
+api/uploads/
+uploads/
+
 # Logs
 logs
 *.log
